@@ -7,3 +7,5 @@ def get_accidents_by_zone(zone: str):
             item.pop('_id', None)
         return result
 
+
+
