@@ -6,7 +6,9 @@ def drop_accidents_collection():
     with get_db() as db:
         db['accidents'].drop()
 
-def load_from_dict_to_db(document_dict, db):
+
+
+def load_one_cvs_dict_to_db(document_dict, db):
     try:
         injuries_keys = ['INJURIES_TOTAL', 'INJURIES_FATAL','INJURIES_INCAPACITATING', 'INJURIES_NON_INCAPACITATING', 'INJURIES_REPORTED_NOT_EVIDENT', 'INJURIES_NO_INDICATION','INJURIES_UNKNOWN']
         injuries = {key: int(document_dict[key]) for key in injuries_keys if document_dict[key] not in [None, "", "0"]}
@@ -27,12 +29,34 @@ def load_from_dict_to_db(document_dict, db):
         print(f"an error occurred, \t CRASH_RECORD_ID: {document_dict["CRASH_RECORD_ID"]} \t error: {e}")
 
 
-def load_from_csv_to_db(csv_file):
-    list_of_dicts = read_csv_into_list(csv_file)
-    with get_db() as db:
-        for document_dict in list_of_dicts:
-            load_from_dict_to_db(document_dict,db)
+def csv_dict_to_db_dict(csv_dict):
+    injuries_keys = ['INJURIES_TOTAL', 'INJURIES_FATAL', 'INJURIES_INCAPACITATING', 'INJURIES_NON_INCAPACITATING',
+                     'INJURIES_REPORTED_NOT_EVIDENT', 'INJURIES_NO_INDICATION', 'INJURIES_UNKNOWN']
+    injuries = {key: int(csv_dict[key]) for key in injuries_keys if csv_dict[key] not in [None, "", "0"]}
+    injuries["MOST_SEVERE_INJURY"] = csv_dict["MOST_SEVERE_INJURY"]
+    cause = {
+        'PRIM_CONTRIBUTORY_CAUSE': csv_dict['PRIM_CONTRIBUTORY_CAUSE'],
+        'SEC_CONTRIBUTORY_CAUSE': csv_dict['SEC_CONTRIBUTORY_CAUSE']
+    }
+    return {
+        'CRASH_RECORD_ID': csv_dict['CRASH_RECORD_ID'],
+        'BEAT_OF_OCCURRENCE': 0 if len(csv_dict['BEAT_OF_OCCURRENCE']) == 0 else int(
+            csv_dict['BEAT_OF_OCCURRENCE']),
+        'CRASH_DATE': get_date_by_string(csv_dict["CRASH_DATE"]),
+        'injuries': injuries,
+        'cause': cause
+    }
 
+def load_all_data_from_csv_to_db(csv_file):
+    list_of_csv_dicts = read_csv_into_list(csv_file)
+    list_of_db_dicts = list(map(csv_dict_to_db_dict,list_of_csv_dicts))
+    with get_db() as db:
+        try:
+            db['accidents'].insert_many(list_of_db_dicts)
+        except Exception as e:
+            print(f"an error occurred while trying to upload al the {len(list_of_db_dicts)} data documents at once, so now the program will insert them one by one \t error: {e}")
+            for document_dict in list_of_csv_dicts:
+                load_one_cvs_dict_to_db(document_dict, db)
 
 
 
