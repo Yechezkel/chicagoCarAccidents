@@ -1,13 +1,16 @@
 from datetime import datetime
 from flask import Blueprint, jsonify
-from data.data_loader import load_from_csv_to_db
 from data.data_getter import get_accidents_by_zone , get_accidents_by_zone_and_cause, get_accidents_by_zone_and_date, get_injures_by_zone
+from data.data_loader import drop_accidents_collection, load_all_data_from_csv_to_db, create_indexes_accidents_collection
+
 accident_bp =Blueprint('accident_bp', __name__)
 
-# @accident_bp.route('/init/', methods=['POST'])
-# def accident_init():
-#     load_from_csv_to_db(r"C:\Users\yechezkel\PycharmProjects\chicagoCarAccidents\csv_files\Traffic_Crashes_20k_rows.csv")
-#     return 200
+@accident_bp.route('/init/', methods=['POST'])
+def accident_init():
+    drop_accidents_collection()
+    load_all_data_from_csv_to_db(r"C:\Users\yechezkel\PycharmProjects\chicagoCarAccidents\csv_files\Traffic_Crashes_800k_rows.csv")
+    create_indexes_accidents_collection()
+    jsonify({'message': 'finished to load'}), 200
 
 
 @accident_bp.route('/accidents/<int:zone>/', methods=['GET'])

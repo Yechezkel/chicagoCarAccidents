@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-import json
+from flask import jsonify
 from data.data_loader import get_db
 
 def get_accidents_by_zone(zone: int):
@@ -60,7 +60,6 @@ def get_accidents_by_zone_and_cause(zone: int):
             for accident in item["accidents"]:
                 accident.pop("_id", None)
         new_dict = {i["cause"]: { "total_accidents": i["total_accidents"], "accidents": i["accidents"]  } for i in result}
-        # print(json.dumps(new_dict, indent=4)) למה כאן לא עובד ההדפסה אבל בפוסט מן הוא כן מחזיר את זה כגייסון
         return new_dict
 
 # it doesnt work i dont know why
@@ -81,6 +80,6 @@ def get_injures_by_zone(zone: int):
         return result
 
 
-if __name__ == "__main__":
-    print(get_injures_by_zone(225))
+# if __name__ == "__main__":
+#     print(get_injures_by_zone(225))
 

@@ -29,6 +29,9 @@ def load_one_cvs_dict_to_db(document_dict, db):
         print(f"an error occurred, \t CRASH_RECORD_ID: {document_dict["CRASH_RECORD_ID"]} \t error: {e}")
 
 
+
+
+
 def csv_dict_to_db_dict(csv_dict):
     injuries_keys = ['INJURIES_TOTAL', 'INJURIES_FATAL', 'INJURIES_INCAPACITATING', 'INJURIES_NON_INCAPACITATING',
                      'INJURIES_REPORTED_NOT_EVIDENT', 'INJURIES_NO_INDICATION', 'INJURIES_UNKNOWN']
@@ -47,6 +50,8 @@ def csv_dict_to_db_dict(csv_dict):
         'cause': cause
     }
 
+
+
 def load_all_data_from_csv_to_db(csv_file):
     list_of_csv_dicts = read_csv_into_list(csv_file)
     list_of_db_dicts = list(map(csv_dict_to_db_dict,list_of_csv_dicts))
@@ -57,6 +62,15 @@ def load_all_data_from_csv_to_db(csv_file):
             print(f"an error occurred while trying to upload al the {len(list_of_db_dicts)} data documents at once, so now the program will insert them one by one \t error: {e}")
             for document_dict in list_of_csv_dicts:
                 load_one_cvs_dict_to_db(document_dict, db)
+
+
+
+
+def create_indexes_accidents_collection():
+    with get_db() as db:
+        db['accidents'].create_index('BEAT_OF_OCCURRENCE')
+        db['accidents'].create_index([("reason.PRIM_CONTRIBUTORY_CAUSE", 1)])
+        db['accidents'].create_index([('BEAT_OF_OCCURRENCE',1), ('INJURIES_TOTAL',1)])
 
 
 
