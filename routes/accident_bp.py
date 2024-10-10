@@ -23,6 +23,7 @@ def route_accidents(zone):
 
 # to check it here
 # @accident_bp.route('/accidents/<int:zone>/<int:year>/<int:month>/<int:day>/', defaults={'radius': 0}, methods=['GET'])
+
 @accident_bp.route('/accidents/<int:zone>/<int:year>/<int:month>/<int:day>/<int:radius>/', methods=['GET'])
 def route_accidents_by_date(zone, year, month, day, radius=0):
     date= datetime(year, month, day)

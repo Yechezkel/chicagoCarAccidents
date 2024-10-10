@@ -8,8 +8,9 @@ app = Flask(__name__)
 app.register_blueprint(accident_bp)
 
 
-# print(get_accidents_by_zone("225"))
-# drop_accidents_collection()
+
+drop_accidents_collection()
+load_from_csv_to_db(r"C:\Users\yechezkel\PycharmProjects\chicagoCarAccidents\csv_files\Traffic_Crashes_800k_rows.csv")
 # load_from_csv_to_db(r"C:\Users\yechezkel\PycharmProjects\chicagoCarAccidents\csv_files\Traffic_Crashes_20k_rows.csv")
 
 @app.route('/')

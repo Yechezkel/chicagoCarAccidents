@@ -2,36 +2,41 @@ from data.data_connect import get_db
 from utils.csv_services import read_csv_into_list
 from utils.utils import get_date_by_string
 
-def load_from_dict_to_db(document_dict):
+def drop_accidents_collection():
     with get_db() as db:
-        try:
-            injuries_keys = ['INJURIES_TOTAL', 'INJURIES_FATAL','INJURIES_INCAPACITATING', 'INJURIES_NON_INCAPACITATING', 'INJURIES_REPORTED_NOT_EVIDENT', 'INJURIES_NO_INDICATION','INJURIES_UNKNOWN']
-            injuries = {key: int(document_dict[key]) for key in injuries_keys if document_dict[key] not in [None, "", "0"]}
-            injuries["MOST_SEVERE_INJURY"] = document_dict["MOST_SEVERE_INJURY"]
-            cause = {
-                'PRIM_CONTRIBUTORY_CAUSE': document_dict['PRIM_CONTRIBUTORY_CAUSE'],
-                'SEC_CONTRIBUTORY_CAUSE': document_dict['SEC_CONTRIBUTORY_CAUSE']
-            }
-            accident = {
-                'CRASH_RECORD_ID': document_dict['CRASH_RECORD_ID'],
-                'BEAT_OF_OCCURRENCE': 0 if len(document_dict['BEAT_OF_OCCURRENCE'])== 0 else int(document_dict['BEAT_OF_OCCURRENCE']),
-                'CRASH_DATE': get_date_by_string(document_dict["CRASH_DATE"]),
-                'injuries': injuries,
-                'cause': cause
-            }
-            db['accidents'].insert_one(accident)
-        except Exception as e:
-            print(f"an error occurred, \t CRASH_RECORD_ID: {document_dict["CRASH_RECORD_ID"]} \t error: {e}")
+        db['accidents'].drop()
+
+def load_from_dict_to_db(document_dict, db):
+    try:
+        injuries_keys = ['INJURIES_TOTAL', 'INJURIES_FATAL','INJURIES_INCAPACITATING', 'INJURIES_NON_INCAPACITATING', 'INJURIES_REPORTED_NOT_EVIDENT', 'INJURIES_NO_INDICATION','INJURIES_UNKNOWN']
+        injuries = {key: int(document_dict[key]) for key in injuries_keys if document_dict[key] not in [None, "", "0"]}
+        injuries["MOST_SEVERE_INJURY"] = document_dict["MOST_SEVERE_INJURY"]
+        cause = {
+            'PRIM_CONTRIBUTORY_CAUSE': document_dict['PRIM_CONTRIBUTORY_CAUSE'],
+            'SEC_CONTRIBUTORY_CAUSE': document_dict['SEC_CONTRIBUTORY_CAUSE']
+        }
+        accident = {
+            'CRASH_RECORD_ID': document_dict['CRASH_RECORD_ID'],
+            'BEAT_OF_OCCURRENCE': 0 if len(document_dict['BEAT_OF_OCCURRENCE'])== 0 else int(document_dict['BEAT_OF_OCCURRENCE']),
+            'CRASH_DATE': get_date_by_string(document_dict["CRASH_DATE"]),
+            'injuries': injuries,
+            'cause': cause
+        }
+        db['accidents'].insert_one(accident)
+    except Exception as e:
+        print(f"an error occurred, \t CRASH_RECORD_ID: {document_dict["CRASH_RECORD_ID"]} \t error: {e}")
 
 
 def load_from_csv_to_db(csv_file):
     list_of_dicts = read_csv_into_list(csv_file)
-    for document_dict in list_of_dicts:
-        load_from_dict_to_db(document_dict)
-
-def drop_accidents_collection():
     with get_db() as db:
-        db['accidents'].drop()
+        for document_dict in list_of_dicts:
+            load_from_dict_to_db(document_dict,db)
+
+
+
+
+
 
 
 
